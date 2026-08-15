@@ -63,7 +63,7 @@ button{border:0;color:white;background:#fff1;border-radius:50%;cursor:pointer}.b
 const audio=document.getElementById('audio'), tracksEl=document.getElementById('tracks');
 let songs=[], index=-1;
 function addSong(name,url,artist="LOVE") {songs.push({name,url,artist}); render();}
-["Love Song — Add your audio","Midnight Feelings — Add your audio","Forever — Add your audio"].forEach((x,i)=>addSong(x,""));
+addSong("Mere Nishan", "Mere Nishan(720P_HD).mp4", "Darshan Raval");
 function render(){
  tracksEl.innerHTML="";
  songs.forEach((s,i)=>{
