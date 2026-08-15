@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>LOVE — Music</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080808;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:-20%;background:radial-gradient(circle at 50% 10%,#35111e 0,transparent 35%),radial-gradient(circle at 90% 80%,#211020 0,transparent 35%);z-index:-1}
+.app{max-width:520px;margin:auto;padding:24px 18px 130px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.logo{font-size:30px;font-weight:900;letter-spacing:4px}.heart{font-size:27px}
+.hero{padding:25px 20px;border:1px solid #ffffff15;border-radius:28px;background:#ffffff09;backdrop-filter:blur(18px);box-shadow:0 20px 70px #0008}
+.small{color:#aaa;font-size:13px;text-transform:uppercase;letter-spacing:2px}.hero h1{font-size:42px;line-height:1;margin:8px 0}.hero p{color:#aaa;margin:0 0 20px}
+button{border:0;color:white;background:#fff1;border-radius:50%;cursor:pointer}.big{width:62px;height:62px;background:#fff;color:#111;font-size:23px}
+.row{display:flex;align-items:center;gap:16px}.cover{width:150px;height:150px;border-radius:24px;display:grid;place-items:center;font-size:58px;background:linear-gradient(145deg,#5a182f,#160c18);box-shadow:0 18px 50px #0008}
+.info{flex:1}.title{font-weight:800;font-size:18px}.artist{color:#999;margin-top:5px}
+.section{display:flex;justify-content:space-between;align-items:center;margin:30px 2px 12px}.section h2{font-size:19px;margin:0}.section span{color:#888;font-size:13px}
+.track{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;margin:7px 0;background:#ffffff06;border:1px solid transparent}.track.active{background:#ffffff0d;border-color:#ffffff15}
+.num{width:28px;color:#777;text-align:center}.trackinfo{flex:1;min-width:0}.trackname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trackartist{font-size:12px;color:#888;margin-top:3px}.play{width:40px;height:40px;font-size:16px}
+.player{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);padding:12px 16px 16px;background:#0d0d0dee;border-top:1px solid #ffffff12;backdrop-filter:blur(22px);z-index:5}
+.progress{height:4px;background:#ffffff18;border-radius:9px;margin-bottom:12px;overflow:hidden}.bar{height:100%;width:0;background:#fff}
+.controls{display:flex;align-items:center;justify-content:center;gap:24px}.controls button{font-size:20px;width:42px;height:42px}.controls .main{background:#fff;color:#111;width:50px;height:50px}
+.now{display:flex;align-items:center;gap:10px;margin-bottom:8px}.mini{width:38px;height:38px;border-radius:10px;background:#35111e;display:grid;place-items:center}.nowtext{flex:1;overflow:hidden}.nowtext div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.time{font-size:11px;color:#777}
+@media(max-width:390px){.cover{width:125px;height:125px}.hero h1{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">LOVE</div><div class="heart">♡</div></header>
+<section class="hero">
+  <div class="small">Your little music corner</div>
+  <h1>Feel the<br>LOVE.</h1>
+  <p>Put your own songs here and press play.</p>
+  <div class="row">
+    <div class="cover" id="cover">♥</div>
+    <div class="info">
+      <div class="title" id="heroTitle">Your first song</div>
+      <div class="artist" id="heroArtist">LOVE playlist</div>
+      <br><button class="big" id="heroPlay">▶</button>
+    </div>
+  </div>
+</section>
+
+<div class="section"><h2>My playlist</h2><span>3 tracks</span></div>
+<div id="tracks"></div>
+
+<div class="section"><h2>Add your music</h2><span>MP3 / audio</span></div>
+<label style="display:block;padding:18px;border:1px dashed #ffffff2a;border-radius:18px;text-align:center;color:#aaa;cursor:pointer">
+  Tap here to choose audio from your phone
+  <input id="files" type="file" accept="audio/*" multiple style="display:none">
+</label>
+</div>
+
+<div class="player">
+  <div class="now"><div class="mini">♥</div><div class="nowtext"><div id="nowTitle">Nothing playing</div><div id="nowArtist" class="trackartist">Choose a song</div></div><div class="time" id="time">0:00</div></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="controls"><button id="prev">⏮</button><button class="main" id="main">▶</button><button id="next">⏭</button></div>
+</div>
+
+<audio id="audio"></audio>
+<script>
+const audio=document.getElementById('audio'), tracksEl=document.getElementById('tracks');
+let songs=[], index=-1;
+function addSong(name,url,artist="LOVE") {songs.push({name,url,artist}); render();}
+["Love Song — Add your audio","Midnight Feelings — Add your audio","Forever — Add your audio"].forEach((x,i)=>addSong(x,""));
+function render(){
+ tracksEl.innerHTML="";
+ songs.forEach((s,i)=>{
+  const d=document.createElement("div"); d.className="track"+(i===index?" active":"");
+  d.innerHTML=`<div class="num">${String(i+1).padStart(2,"0")}</div><div class="trackinfo"><div class="trackname">${escapeHtml(s.name)}</div><div class="trackartist">${escapeHtml(s.artist)}</div></div><button class="play">${i===index&&!audio.paused?"❚❚":"▶"}</button>`;
+  d.querySelector("button").onclick=()=>play(i); tracksEl.appendChild(d);
+ });
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function play(i){
+ if(!songs[i].url){document.getElementById("files").click();return}
+ index=i; audio.src=songs[i].url; audio.play(); update();
+}
+function update(){
+ const s=songs[index]; if(s){document.getElementById("nowTitle").textContent=s.name;document.getElementById("nowArtist").textContent=s.artist;document.getElementById("heroTitle").textContent=s.name;document.getElementById("heroArtist").textContent=s.artist}
+ document.getElementById("main").textContent=audio.paused?"▶":"❚❚"; render();
+}
+document.getElementById("main").onclick=()=>{if(index<0){play(0);return} audio.paused?audio.play():audio.pause();update()}
+document.getElementById("heroPlay").onclick=()=>document.getElementById("main").click();
+document.getElementById("prev").onclick=()=>{if(songs.length)play((index-1+songs.length)%songs.length)}
+document.getElementById("next").onclick=()=>{if(songs.length)play((index+1)%songs.length)}
+audio.onplay=update; audio.onpause=update; audio.onended=()=>document.getElementById("next").click();
+audio.ontimeupdate=()=>{if(audio.duration){document.getElementById("bar").style.width=(audio.currentTime/audio.duration*100)+"%"}document.getElementById("time").textContent=format(audio.currentTime)}
+function format(t){t=Math.floor(t||0);return Math.floor(t/60)+":"+String(t%60).padStart(2,"0")}
+document.getElementById("files").onchange=e=>{
+ [...e.target.files].forEach(f=>addSong(f.name,URL.createObjectURL(f), "Your device"));
+ if(index<0&&songs.length>3) play(3);
+};
+render();
+</script>
+</body>
+</html>
